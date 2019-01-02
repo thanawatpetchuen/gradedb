@@ -14,29 +14,6 @@ import pandas as pd
 
 
 
-def get_delivery_options(answers):
-    options = ['bike', 'car', 'truck']
-    if answers['size'] == 'jumbo':
-        options.append('helicopter')
-    return options
-
-
-questions = [
-    {
-        'type': 'list',
-        'name': 'todo',
-        'message': 'What do you want to do?',
-        'choices': [
-            'Insert',
-            'Update',
-            'Summary'
-        ]
-    }
-]
-# answers = prompt(questions, style=custom_style_2)
-# pprint(answers)
-
-
 class CSVdb:
     def __init__(self):
         self.db = None
