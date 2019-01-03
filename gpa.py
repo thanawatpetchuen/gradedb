@@ -13,7 +13,6 @@ import art
 import pandas as pd
 
 
-
 class CSVdb:
     def __init__(self):
         self.db = None
@@ -29,10 +28,17 @@ class CSVdb:
         }
 
     def load(self, file_name):
-        self.db = pd.read_csv(file_name, encoding = 'utf8', dtype={'Course Id': 'str', 'Grade(Score)': 'float', 'Credit': 'int', 'Year': 'str', 'Semester': 'str'})
+        # Load CSV file to DataFrame
+
+        self.db = pd.read_csv(file_name, encoding='utf8',
+                              dtype={'Course Id': 'str', 'Grade(Score)': 'float',
+                                     'Credit': 'int', 'Year': 'str','Semester': 'str'})
+
+        # Print logo text
         art.tprint("GradeDB", font="roman")
 
     def check_int(self, text):
+        # Check the input text if it's int
         try:
             if int(text):
                 return True
@@ -40,17 +46,21 @@ class CSVdb:
             return False
 
     def singlepoint(self, n):
+        # Check the number if have 1 floating point
         gpa = str(n)
         if gpa[::-1].find('.') == 1:
             return True
         return False
 
     def update_row_with_dict(self, dictionary, index):
+        # Update DataFrame with index by dictionary
         for key in dictionary.keys():
             self.db.loc[index, key] = dictionary.get(key)
 
     def main(self):
-        questions = [
+        # Main function to call
+
+        main_menu_questions = [
             {
                 'type': 'list',
                 'name': 'todo',
@@ -60,15 +70,16 @@ class CSVdb:
                     'Update',
                     'Summary',
                     'Calculate GPA',
-                    'Save and Close'
+                    'Save and Close',
+                    'Close'
                 ]
             }
         ]
 
-        answers = prompt(questions, style=custom_style_2)
-        while(answers['todo'] != "Save and Close"):
-            if(answers['todo'] == "Insert"):
-                questions2 = [
+        main_menu_answers = prompt(main_menu_questions, style=custom_style_2)
+        while main_menu_answers['todo'] != "Save and Close":
+            if main_menu_answers['todo'] == "Insert":
+                insert_questions = [
                     {
                         'type': 'input',
                         'name': 'Course Id',
@@ -121,17 +132,14 @@ class CSVdb:
                         ]
                     },
                 ]
-                answers2 = prompt(questions2, style=custom_style_2)
-                answers2["Grade(Score)"] = self.grade_table[answers2['Grade']]
-                # pprint(answers2)
+                insert_answers = prompt(insert_questions, style=custom_style_2)   # Get the answer
+                insert_answers["Grade(Score)"] = self.grade_table[insert_answers['Grade']]  # Map Grade to score
 
-                self.db = self.db.append(answers2, ignore_index=True)
-                # pprint(self.db)
+                self.db = self.db.append(insert_answers, ignore_index=True)  # Append the new course to DB
 
-            # pprint(answers)
-            elif (answers['todo'] == "Update"):
-                pprint(self.db)
-                questions4 = [
+            elif main_menu_answers['todo'] == "Update":
+                pprint(self.db)  # Show current DB
+                update_questions = [
                     {
                         'type': 'input',
                         'name': 'course',
@@ -140,8 +148,8 @@ class CSVdb:
                     }
                 ]
 
-                answers4 = prompt(questions4, style=custom_style_2)
-                course_info = self.db.iloc[int(answers4['course'])]
+                update_answers = prompt(update_questions, style=custom_style_2)
+                course_info = self.db.iloc[int(update_answers['course'])]  # Find selected course from answer
 
                 default_grade = {
                     'A': 0,
@@ -154,7 +162,7 @@ class CSVdb:
                     'F': 7
                 }
 
-                questions5 = [
+                update_course_questions = [
                     {
                         'type': 'input',
                         'name': 'Course Id',
@@ -215,26 +223,22 @@ class CSVdb:
                     },
                 ]
 
-                answers5 = prompt(questions5, style=custom_style_2)
-                answers5["Grade(Score)"] = self.grade_table[answers5['Grade']]
+                update_course_answers = prompt(update_course_questions, style=custom_style_2)
+                update_course_answers["Grade(Score)"] = self.grade_table[update_course_answers['Grade']]  # Map Grade from score
 
+                self.update_row_with_dict(update_course_answers, int(update_answers['course']))  # Update DB from answer
 
-                pprint(answers5)
+            elif main_menu_answers['todo'] == "Summary":
+                pprint(self.db)  # Show DB
 
-                self.update_row_with_dict(answers5, int(answers4['course']))
+            elif main_menu_answers['todo'] == "Calculate GPA":
 
-            elif(answers['todo'] == "Summary"):
-                pprint(self.db)
+                year_semester = self.db[["Year", "Semester"]]  # Select only Year and Semester coloumn
+                year_semester = year_semester.drop_duplicates()  # Drop the duplicate value
+                # Get the unique Year and Semester pair
+                year_ = ["Year {} Semester {}".format(row[1]['Year'], row[1]['Semester']) for row in year_semester.iterrows()]
 
-            elif (answers['todo'] == "Calculate GPA"):
-
-                yearxsemester = self.db[["Year", "Semester"]]
-                yearxsemester = yearxsemester.drop_duplicates()
-                year_ = ["Year {} Semester {}".format(row[1]['Year'], row[1]['Semester']) for row in yearxsemester.iterrows()]
-
-                yearxsemester_dict = {}
-                # for i
-                questions3 = [
+                select_term_questions = [
                     {
                         'type': 'list',
                         'name': 'term',
@@ -243,36 +247,43 @@ class CSVdb:
                     }
                 ]
 
-                answers3 = prompt(questions3, style=custom_style_2)
+                select_term_answers = prompt(select_term_questions, style=custom_style_2)
 
-                if(answers3['term'] == 'Total'):
-
-                    self.db = self.db.astype({'Credit': int})
-                    sp = self.db['Grade(Score)'] * self.db['Credit']
-                    gpa = sp.sum() / self.db['Credit'].sum()
-                    art.tprint("GPA = {}".format(gpa // 0.01 / 100))
-                else:
-                    year_split = answers3['term'].split(" ")
-                    year = year_split[1]
-                    semester = year_split[3]
-                    db_filter = self.db[(self.db["Year"] == year) & (self.db["Semester"] == semester)]
-                    db_filter = db_filter.astype({'Credit': int})
-                    sp = db_filter['Grade(Score)'] * db_filter['Credit']
-                    gpa = sp.sum() / db_filter['Credit'].sum()
-                    # print("GPA:", gpa, "sp:", sp.sum(), "credit:", db_filter['Credit'].sum())
-                    if not self.singlepoint(gpa):
+                if select_term_answers['term'] == 'Total':
+                    self.db = self.db.astype({'Credit': int})  # Cast credit column to int
+                    # (After update mode will cause conflict!)
+                    sp = self.db['Grade(Score)'] * self.db['Credit']  # Calculate Product of Score and Credit
+                    gpa = sp.sum() / self.db['Credit'].sum()  # Calculate SumProduct / Sum of Credit
+                    if not self.singlepoint(gpa):  # Avoid round down if there is one floating point
                         gpa = gpa // 0.01 / 100
+                    art.tprint("GPA = {}".format(gpa))  # Print the GPA
+                else:
+                    #  Calculate specific term
+                    year_split = select_term_answers['term'].split(" ")  # Extract the selected term
+                    year = year_split[1]  # Get the year
+                    semester = year_split[3]  # Get the semester
+                    # Filter the db by given Year and Semester
+                    db_filter = self.db[(self.db["Year"] == year) & (self.db["Semester"] == semester)]
+                    db_filter = db_filter.astype({'Credit': int})  # Cast credit column to int (same as above)
+                    sp = db_filter['Grade(Score)'] * db_filter['Credit']  # Calculate Product of Score and Credit
+                    gpa = sp.sum() / db_filter['Credit'].sum()  # Calculate SumProduct / Sum of Credit
+                    if not self.singlepoint(gpa):  # Avoid round down if there is one floating point
+                        gpa = gpa // 0.01 / 100
+                    art.tprint("GPA = {}".format(gpa))  # Print the GPA
 
-                    art.tprint("GPA = {}".format(gpa))
+            main_menu_answers = prompt(main_menu_questions, style=custom_style_2)  # Loop the main menu question
 
-            answers = prompt(questions, style=custom_style_2)
-
-        if (answers['todo'] == "Save and Close"):
+        if (main_menu_answers['todo'] == "Save and Close"):
+            # Save current state of db to csv and close
+            print("Saveing....")
             self.db.to_csv('GPA.csv', encoding='utf-8', index=False)
+            print("Complete!")
+            art.tprint("Goodbye")
+        else:
             art.tprint("Goodbye")
 
 if __name__ == "__main__":
     csv = CSVdb()
     csv.load('GPA.CSV')
     csv.main()
-    # print(csv.db)
+
