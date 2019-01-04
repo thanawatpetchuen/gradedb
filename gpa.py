@@ -5,6 +5,7 @@ list prompt example
 from __future__ import print_function, unicode_literals
 
 from pprint import pprint
+from tabulate import tabulate
 
 from PyInquirer import style_from_dict, Token, prompt, Separator
 
@@ -77,7 +78,7 @@ class CSVdb:
         ]
 
         main_menu_answers = prompt(main_menu_questions, style=custom_style_2)
-        while main_menu_answers['todo'] != "Save and Close":
+        while (main_menu_answers['todo'] != "Save and Close") and (main_menu_answers['todo'] != "Close") :
             if main_menu_answers['todo'] == "Insert":
                 insert_questions = [
                     {
@@ -138,12 +139,12 @@ class CSVdb:
                 self.db = self.db.append(insert_answers, ignore_index=True)  # Append the new course to DB
 
             elif main_menu_answers['todo'] == "Update":
-                pprint(self.db)  # Show current DB
+                print(tabulate(self.db, headers='keys', tablefmt='psql'))  # Show current DB
                 update_questions = [
                     {
                         'type': 'input',
                         'name': 'course',
-                        'message': 'Which year and semester do you want?',
+                        'message': 'Which course do you want to update?',
                          'validate': lambda text: int(text) <= self.db.tail(1).index.item(),
                     }
                 ]
@@ -229,7 +230,8 @@ class CSVdb:
                 self.update_row_with_dict(update_course_answers, int(update_answers['course']))  # Update DB from answer
 
             elif main_menu_answers['todo'] == "Summary":
-                pprint(self.db)  # Show DB
+                # pprint(self.db)  # Show DB
+                print(tabulate(self.db, headers='keys', tablefmt='psql'))
 
             elif main_menu_answers['todo'] == "Calculate GPA":
 
