@@ -230,7 +230,7 @@ class CSVdb:
                 self.update_row_with_dict(update_course_answers, int(update_answers['course']))  # Update DB from answer
 
             elif main_menu_answers['todo'] == "Summary":
-                # pprint(self.db)  # Show DB
+                # Show DB
                 print(tabulate(self.db, headers='keys', tablefmt='psql'))
 
             elif main_menu_answers['todo'] == "Calculate GPA":
@@ -239,6 +239,7 @@ class CSVdb:
                 year_semester = year_semester.drop_duplicates()  # Drop the duplicate value
                 # Get the unique Year and Semester pair
                 year_ = ["Year {} Semester {}".format(row[1]['Year'], row[1]['Semester']) for row in year_semester.iterrows()]
+                year_ = sorted(year_)
 
                 select_term_questions = [
                     {
@@ -254,35 +255,69 @@ class CSVdb:
                 if select_term_answers['term'] == 'Total':
                     self.db = self.db.astype({'Credit': int})  # Cast credit column to int
                     # (After update mode will cause conflict!)
-                    sp = self.db['Grade(Score)'] * self.db['Credit']  # Calculate Product of Score and Credit
-                    gpa = sp.sum() / self.db['Credit'].sum()  # Calculate SumProduct / Sum of Credit
+                    product_column = self.db['Grade(Score)'] * self.db['Credit']  # Calculate Product of Score and Credit
+                    gpa = product_column.sum() / self.db['Credit'].sum()  # Calculate SumProduct / Sum of Credit
                     if not self.singlepoint(gpa):  # Avoid round down if there is one floating point
                         gpa = gpa // 0.01 / 100
                     art.tprint("GPA = {}".format(gpa))  # Print the GPA
                 else:
-                    #  Calculate specific term
-                    year_split = select_term_answers['term'].split(" ")  # Extract the selected term
-                    year = year_split[1]  # Get the year
-                    semester = year_split[3]  # Get the semester
-                    # Filter the db by given Year and Semester
-                    db_filter = self.db[(self.db["Year"] == year) & (self.db["Semester"] == semester)]
-                    db_filter = db_filter.astype({'Credit': int})  # Cast credit column to int (same as above)
-                    sp = db_filter['Grade(Score)'] * db_filter['Credit']  # Calculate Product of Score and Credit
-                    gpa = sp.sum() / db_filter['Credit'].sum()  # Calculate SumProduct / Sum of Credit
-                    if not self.singlepoint(gpa):  # Avoid round down if there is one floating point
-                        gpa = gpa // 0.01 / 100
-                    art.tprint("GPA = {}".format(gpa))  # Print the GPA
+
+                    select_type_questions = [
+                        {
+                            'type': 'list',
+                            'name': 'type',
+                            'message': 'Which type do you want?',
+                            'choices': ['Cumulative', 'Semester'] 
+                        }
+                    ]
+
+                    select_type_answer = prompt(select_type_questions, style=custom_style_2)
+
+                    if select_type_answer['type'] == "Semester":
+                        #  Calculate specific term
+                        year_split = select_term_answers['term'].split(" ")  # Extract the selected term
+                        year = year_split[1]  # Get the year
+                        semester = year_split[3]  # Get the semester
+                        # Filter the db by given Year and Semester
+                        db_filter = self.db[(self.db["Year"] == year) & (self.db["Semester"] == semester)]
+                        db_filter = db_filter.astype({'Credit': int})  # Cast credit column to int (same as above)
+                        product_column = db_filter['Grade(Score)'] * db_filter['Credit']  # Calculate Product of Score and Credit
+                        gpa = product_column.sum() / db_filter['Credit'].sum()  # Calculate SumProduct / Sum of Credit
+                        if not self.singlepoint(gpa):  # Avoid round down if there is one floating point
+                            gpa = gpa // 0.01 / 100
+                        art.tprint("GPA = {}".format(gpa))  # Print the GPA
+                    else:
+                        #  Calculate cumulative gpa
+                        # Slice the list of year to only use semester
+                        year_slice = year_[:year_.index(select_term_answers['term'])+1]
+                        sum_product = 0
+                        credit_sum = 0
+                        for select in year_slice:
+                            select_split = select.split(" ")  # Extract the selected term
+                            year_select = select_split[1]  # Get the year
+                            semester_select = select_split[3]  # Get the semester
+                            # Filter the db by given Year and Semester
+                            db_filter = self.db[(self.db["Year"] == year_select) & (self.db["Semester"] == semester_select)]
+                            product_column = db_filter['Grade(Score)'] * db_filter['Credit']  # Calculate Product of Score and Credit
+                            sum_product += product_column.sum()  # Collect product
+                            cretdit = db_filter['Credit'].sum()  # Calculate sum of credit
+                            credit_sum += cretdit  # Collect credit
+                        gpa = sum_product / credit_sum  # Calculate SumProduct / Sum of Credit
+                        if not self.singlepoint(gpa):  # Avoid round down if there is one floating point
+                            gpa = gpa // 0.01 / 100
+                        art.tprint("GPA = {}".format(gpa))  # Print the GPA
 
             main_menu_answers = prompt(main_menu_questions, style=custom_style_2)  # Loop the main menu question
 
-        if (main_menu_answers['todo'] == "Save and Close"):
+        if main_menu_answers['todo'] == "Save and Close":
             # Save current state of db to csv and close
-            print("Saveing....")
+            print("Saving....")
             self.db.to_csv('GPA.csv', encoding='utf-8', index=False)
             print("Complete!")
             art.tprint("Goodbye")
         else:
             art.tprint("Goodbye")
+
 
 if __name__ == "__main__":
     csv = CSVdb()
