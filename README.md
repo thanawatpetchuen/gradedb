@@ -2,11 +2,8 @@
 
 The program that load the CSV file and use them as database. Main function is to Insert / Update / Save course and it's detail and Calculate the GPA from given CSV
 
-## Getting Started
 
-These instructions will get you a copy of the project up and running on your local machine for development and testing purposes. See deployment for notes on how to deploy the project on a live system.
-
-### Prerequisites
+## Prerequisites
 
 This program needs Python 3 and following libraries
 
