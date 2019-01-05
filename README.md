@@ -11,7 +11,7 @@ This program needs Python 3 and following libraries
 * [tabulate](https://pypi.org/project/tabulate/) - Pretty table presentation
 * [pandas](https://pandas.pydata.org/) - The way of playing with data
 * [art](https://pypi.org/project/art/) - Used to generate ASCII art
-* [NBLOGIC](https://pypi.org/project/nblogic/) - NBLOGIC for python by Thanawat Petchuen
+* [NBLOGIC](https://pypi.org/project/nblogic/) - NBLOGIC for Python by Thanawat Petchuen
 
 
 ### Installing
