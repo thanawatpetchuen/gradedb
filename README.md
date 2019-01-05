@@ -16,24 +16,22 @@ This program needs Python 3 and following libraries
 
 ### Installing
 
-First, clone this project
+First, install this project by pip
 
 ```
-git clone https://bitbucket.org/thanawatpetchuen/gradedb.git
+pip install gradedb
 ```
 
-And then go to folder
+And then run the script
 
 ```
-cd gradedb
+gradedb "filename.csv"
 ```
-
-Run the script
+or use KLOGIC database (require authentication)
 
 ```
-python gpa.py
+gradedb
 ```
-
 
 ## Authors
 
