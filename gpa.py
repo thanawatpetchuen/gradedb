@@ -12,11 +12,12 @@ from PyInquirer import style_from_dict, Token, prompt, Separator
 from examples import custom_style_2
 import art
 import pandas as pd
+import sys
 
 
 
 class CSVdb:
-    def __init__(self, file):
+    def __init__(self, file=None):
         self.db = None
         self.file = file
         self.grade_table = {
@@ -81,9 +82,12 @@ class CSVdb:
 
         source_answers = prompt(source_questions, style=custom_style_2)
         if source_answers['source'] == "CSV":
-            self.load(self.file)
-            print("*----- CSV is loaded -----*")
-            self.main()
+            if self.file:
+                self.load(self.file)
+                print("*----- CSV is loaded -----*")
+                self.main()
+            else:
+                print("*----- No CSV file is provided -----*")
         else:
             import nblogic
             klogic = nblogic.KLOGIC()
@@ -352,9 +356,17 @@ class CSVdb:
         else:
             art.tprint("Goodbye")
 
+def main():
+    if len(sys.argv) > 1:
+        file  = str(sys.argv[1])
+        csv = CSVdb(file)
+        csv.source()
+    else:
+        csv = CSVdb()
+        csv.source()
 
 if __name__ == "__main__":
-    csv = CSVdb('GPA.CSV')
+    csv = CSVdb()
     # csv.load('GPA.CSV')
     csv.source()
     # csv.main()
