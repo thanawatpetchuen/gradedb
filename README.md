@@ -22,7 +22,9 @@ First, install this project by pip
 pip install gradedb
 ```
 
-And then run the script
+### Usage
+
+Go to console and run the script
 
 ```
 gradedb "filename.csv"
@@ -32,6 +34,14 @@ or use KLOGIC database (require authentication)
 ```
 gradedb
 ```
+
+## Note
+
+The structure (header) of CSV file must be following
+| Course Id  | Course Name | Year | Semester | Credit | Section | Grade | Grade(Score) |
+| ------------- | ------------- | ------------- | ------------- | ------------- | ------------- | ------------- | ------------- |
+| 010013001  | INTRODUCTION TO ENGINEERING  | 2559  | 1 | 1 | 1 | B | 3.0 |
+| 010123102  | PROGRAMMING FUNDAMENTALS  | 2559  | 1 | 3 | 1 | A | 4.0 |
 
 ## Authors
 
