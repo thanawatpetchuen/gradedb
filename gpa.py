@@ -14,9 +14,11 @@ import art
 import pandas as pd
 
 
+
 class CSVdb:
-    def __init__(self):
+    def __init__(self, file):
         self.db = None
+        self.file = file
         self.grade_table = {
             'A': 4,
             'B+': 3.5,
@@ -36,7 +38,7 @@ class CSVdb:
                                      'Credit': 'int', 'Year': 'str','Semester': 'str'})
 
         # Print logo text
-        art.tprint("GradeDB", font="roman")
+
 
     def check_int(self, text):
         # Check the input text if it's int
@@ -57,6 +59,38 @@ class CSVdb:
         # Update DataFrame with index by dictionary
         for key in dictionary.keys():
             self.db.loc[index, key] = dictionary.get(key)
+
+    def source(self):
+        # To select the source of database to use
+        # 2 options here. CSV or KLOGIC
+        # KLOGIC require authentication from module NBLOGIC
+        # That means you'll need klogic account for this option
+
+        art.tprint("GradeDB", font="roman")
+        source_questions = [
+            {
+                'type': 'list',
+                'name': 'source',
+                'message': 'Which source of database do you want to load?',
+                'choices': [
+                    'CSV',
+                    'KLOGIC'
+                ]
+            }
+        ]
+
+        source_answers = prompt(source_questions, style=custom_style_2)
+        if source_answers['source'] == "CSV":
+            self.load(self.file)
+            print("*----- CSV is loaded -----*")
+            self.main()
+        else:
+            import nblogic
+            klogic = nblogic.KLOGIC()
+            if klogic.authentication():
+                self.db = klogic.gradedb()
+                print("*----- Database from KLOGIC is loaded -----*")
+                self.main()
 
     def main(self):
         # Main function to call
@@ -320,7 +354,8 @@ class CSVdb:
 
 
 if __name__ == "__main__":
-    csv = CSVdb()
-    csv.load('GPA.CSV')
-    csv.main()
+    csv = CSVdb('GPA.CSV')
+    # csv.load('GPA.CSV')
+    csv.source()
+    # csv.main()
 
