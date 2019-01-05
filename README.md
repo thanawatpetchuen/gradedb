@@ -5,7 +5,7 @@ The program that load the CSV file and use them as database. Main function is to
 
 ## Prerequisites
 
-This program needs Python 3 and following libraries
+This program needs Python 3 and following libraries (No need to install individually just install the "gradedb")
 
 * [PyInquirer](https://github.com/CITGuru/PyInquirer) - The interactive UI for Python
 * [tabulate](https://pypi.org/project/tabulate/) - Pretty table presentation
@@ -37,11 +37,7 @@ gradedb
 
 ## Note
 
-| First Header  | Second Header |
-| ------------- | ------------- |
-| Content Cell  | Content Cell  |
-| Content Cell  | Content Cell  |
-
+The structure (header) of CSV file must be following
 
 | Course Id  | Course Name | Year | Semester | Credit | Section | Grade | Grade(Score) |
 | --- | --- | --- | --- | --- | --- | --- | --- |
